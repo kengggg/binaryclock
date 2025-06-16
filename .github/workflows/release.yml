@@ -175,14 +175,27 @@ jobs:
             zip
 
       - name: 🧪 Run Full Test Suite
+        if: matrix.os != 'windows-latest'
         run: make test
-        shell: ${{ matrix.os == 'windows-latest' && 'msys2 {0}' || 'bash' }}
+        shell: bash
+
+      - name: 🧪 Run Full Test Suite (Windows)
+        if: matrix.os == 'windows-latest'
+        run: make test
+        shell: msys2 {0}
 
       - name: 🔨 Build All Targets
+        if: matrix.os != 'windows-latest'
         run: make all
-        shell: ${{ matrix.os == 'windows-latest' && 'msys2 {0}' || 'bash' }}
+        shell: bash
 
-      - name: 📦 Create Distribution Packages
+      - name: 🔨 Build All Targets (Windows)
+        if: matrix.os == 'windows-latest'
+        run: make all
+        shell: msys2 {0}
+
+      - name: 📦 Create Distribution Packages (Non-Windows)
+        if: matrix.os != 'windows-latest'
         run: |
           # Build all distribution packages
           make dist-all
@@ -192,11 +205,7 @@ jobs:
           
           # Create CLI package (platform-specific)
           cd dist
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            zip -r ../release/binary-clock-cli-${{ github.ref_name }}-${{ matrix.target }}.zip cli/
-          else
-            tar -czf ../release/binary-clock-cli-${{ github.ref_name }}-${{ matrix.target }}.tar.gz cli/
-          fi
+          tar -czf ../release/binary-clock-cli-${{ github.ref_name }}-${{ matrix.target }}.tar.gz cli/
           cd ..
           
           # Create cross-platform packages (only on Linux to avoid duplicates)
@@ -215,35 +224,73 @@ jobs:
             git archive --format=tar.gz --prefix=binary-clock-${{ github.ref_name#v }}/ HEAD > release/binary-clock-source-${{ github.ref_name }}.tar.gz
             git archive --format=zip --prefix=binary-clock-${{ github.ref_name#v }}/ HEAD > release/binary-clock-source-${{ github.ref_name }}.zip
           fi
-        shell: ${{ matrix.os == 'windows-latest' && 'msys2 {0}' || 'bash' }}
+        shell: bash
 
-      - name: 📋 List Created Packages
+      - name: 📦 Create Distribution Packages (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          # Build all distribution packages
+          make dist-all
+          
+          # Create release directory
+          mkdir -p release
+          
+          # Create CLI package (platform-specific)
+          cd dist
+          zip -r ../release/binary-clock-cli-${{ github.ref_name }}-${{ matrix.target }}.zip cli/
+          cd ..
+        shell: msys2 {0}
+
+      - name: 📋 List Created Packages (Non-Windows)
+        if: matrix.os != 'windows-latest'
         run: |
           echo "📦 Created packages:"
           ls -la release/
-        shell: ${{ matrix.os == 'windows-latest' && 'msys2 {0}' || 'bash' }}
+        shell: bash
 
-      - name: 🔐 Generate Checksums
+      - name: 📋 List Created Packages (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          echo "📦 Created packages:"
+          ls -la release/
+        shell: msys2 {0}
+
+      - name: 🔐 Generate Checksums (Linux)
+        if: matrix.os == 'ubuntu-latest'
         run: |
           cd release
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            # Windows checksums
-            for file in *; do
-              if [ -f "$file" ]; then
-                echo "$(sha256sum "$file")" >> checksums-${{ matrix.target }}.txt
-              fi
-            done
-          elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
-            # Linux checksums (for all cross-platform packages)
-            sha256sum * > checksums.txt
-          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            # macOS checksums  
-            shasum -a 256 * > checksums-${{ matrix.target }}.txt
-          fi
+          # Linux checksums (for all cross-platform packages)
+          sha256sum * > checksums.txt
           
           echo "🔐 Generated checksums:"
-          cat checksums*.txt 2>/dev/null || true
-        shell: ${{ matrix.os == 'windows-latest' && 'msys2 {0}' || 'bash' }}
+          cat checksums.txt
+        shell: bash
+
+      - name: 🔐 Generate Checksums (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          cd release
+          # macOS checksums  
+          shasum -a 256 * > checksums-${{ matrix.target }}.txt
+          
+          echo "🔐 Generated checksums:"
+          cat checksums-${{ matrix.target }}.txt
+        shell: bash
+
+      - name: 🔐 Generate Checksums (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          cd release
+          # Windows checksums
+          for file in *; do
+            if [ -f "$file" ]; then
+              echo "$(sha256sum "$file")" >> checksums-${{ matrix.target }}.txt
+            fi
+          done
+          
+          echo "🔐 Generated checksums:"
+          cat checksums-${{ matrix.target }}.txt
+        shell: msys2 {0}
 
       - name: 📤 Upload CLI Package
         uses: actions/upload-release-asset@v1
