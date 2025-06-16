@@ -25,6 +25,7 @@ typedef struct {
     binary_clock_display_fn_t display_fn;
     void* context;
     bool active;
+    int id;
 } display_entry_t;
 
 /**
@@ -44,6 +45,7 @@ int binary_clock_display_register(binary_clock_display_fn_t display_fn, void* co
             display_registry[i].display_fn = display_fn;
             display_registry[i].context = context;
             display_registry[i].active = true;
+            display_registry[i].id = next_registration_id;
             return next_registration_id++;
         }
     }
@@ -53,21 +55,21 @@ int binary_clock_display_register(binary_clock_display_fn_t display_fn, void* co
 
 binary_clock_error_t binary_clock_display_unregister(int registration_id) {
     if (registration_id < 0) {
-        return BINARY_CLOCK_SUCCESS; // Silently succeed for invalid IDs
+        return BINARY_CLOCK_ERROR_INVALID_TIME; // Invalid ID parameter
     }
-    
-    // Find and deactivate the display
-    // Note: Simple approach - in a full implementation we'd maintain ID mapping
+
+    // Find entry matching the registration ID
     for (int i = 0; i < MAX_REGISTERED_DISPLAYS; i++) {
-        if (display_registry[i].active) {
+        if (display_registry[i].active && display_registry[i].id == registration_id) {
             display_registry[i].active = false;
             display_registry[i].display_fn = NULL;
             display_registry[i].context = NULL;
+            display_registry[i].id = -1;
             return BINARY_CLOCK_SUCCESS;
         }
     }
-    
-    return BINARY_CLOCK_SUCCESS; // Silently succeed for invalid IDs
+
+    return BINARY_CLOCK_ERROR_INVALID_TIME; // ID not found
 }
 
 void binary_clock_display_update_all(void) {
