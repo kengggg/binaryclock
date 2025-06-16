@@ -221,8 +221,9 @@ jobs:
             cd ..
             
             # Source package
-            git archive --format=tar.gz --prefix=binary-clock-${{ github.ref_name#v }}/ HEAD > release/binary-clock-source-${{ github.ref_name }}.tar.gz
-            git archive --format=zip --prefix=binary-clock-${{ github.ref_name#v }}/ HEAD > release/binary-clock-source-${{ github.ref_name }}.zip
+            VERSION=$(echo "${{ github.ref_name }}" | sed 's/^v//')
+            git archive --format=tar.gz --prefix=binary-clock-${VERSION}/ HEAD > release/binary-clock-source-${{ github.ref_name }}.tar.gz
+            git archive --format=zip --prefix=binary-clock-${VERSION}/ HEAD > release/binary-clock-source-${{ github.ref_name }}.zip
           fi
         shell: bash
 
