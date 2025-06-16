@@ -83,8 +83,6 @@ This project features fully automated releases:
 
 **Latest Release**: [View all releases →](https://github.com/kengggg/binaryclock/releases)
 
-Press Ctrl+C to gracefully exit continuous mode.
-
 ## Building & Testing
 
 ```bash
@@ -105,6 +103,9 @@ The binary clock uses a modular architecture with complete separation between co
 - **Core API**: Handles time conversion and binary representation (data only)
 - **Display Layer**: Renders data in various formats (emoji, binary, JSON, raw)
 - **CLI Interface**: Provides single-shot or continuous display modes
+
+### Loop Mode
+Run the program with `--loop` for continuous updates. Press Ctrl+C to exit.
 
 Each time component (hours, minutes, seconds) is split into tens and units, then converted to binary representation.
 
