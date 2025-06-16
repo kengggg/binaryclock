@@ -30,6 +30,7 @@ void display_binary(const char* bin) {
 
 // Signal handler for graceful exit
 void signal_handler(int sig) {
+    (void)sig; // Suppress unused parameter warning
     printf("\n\nBinary clock stopped.\n");
     exit(0);
 }
