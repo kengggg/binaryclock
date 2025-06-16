@@ -54,19 +54,19 @@ void test_to_binary_basic() {
     char buffer[8];
     
     // Test converting 0 to binary
-    to_binary(0, 4, buffer);
+    ASSERT_EQ(0, to_binary(0, 4, buffer, sizeof(buffer)));
     ASSERT_STR_EQ("0000", buffer);
     
     // Test converting 1 to binary
-    to_binary(1, 4, buffer);
+    ASSERT_EQ(0, to_binary(1, 4, buffer, sizeof(buffer)));
     ASSERT_STR_EQ("0001", buffer);
     
     // Test converting 15 to binary (max 4-bit value)
-    to_binary(15, 4, buffer);
+    ASSERT_EQ(0, to_binary(15, 4, buffer, sizeof(buffer)));
     ASSERT_STR_EQ("1111", buffer);
     
     // Test converting 5 to binary
-    to_binary(5, 4, buffer);
+    ASSERT_EQ(0, to_binary(5, 4, buffer, sizeof(buffer)));
     ASSERT_STR_EQ("0101", buffer);
 }
 
@@ -74,15 +74,15 @@ void test_to_binary_different_bit_lengths() {
     char buffer[8];
     
     // Test 3-bit conversion
-    to_binary(7, 3, buffer);
+    ASSERT_EQ(0, to_binary(7, 3, buffer, sizeof(buffer)));
     ASSERT_STR_EQ("111", buffer);
     
     // Test 6-bit conversion
-    to_binary(63, 6, buffer);
+    ASSERT_EQ(0, to_binary(63, 6, buffer, sizeof(buffer)));
     ASSERT_STR_EQ("111111", buffer);
     
     // Test 6-bit conversion with smaller value
-    to_binary(32, 6, buffer);
+    ASSERT_EQ(0, to_binary(32, 6, buffer, sizeof(buffer)));
     ASSERT_STR_EQ("100000", buffer);
 }
 
@@ -90,17 +90,17 @@ void test_to_binary_edge_cases() {
     char buffer[8];
     
     // Test maximum values for different bit lengths
-    to_binary(1, 1, buffer);
+    ASSERT_EQ(0, to_binary(1, 1, buffer, sizeof(buffer)));
     ASSERT_STR_EQ("1", buffer);
     
-    to_binary(3, 2, buffer);
+    ASSERT_EQ(0, to_binary(3, 2, buffer, sizeof(buffer)));
     ASSERT_STR_EQ("11", buffer);
     
     // Test zero with different bit lengths
-    to_binary(0, 1, buffer);
+    ASSERT_EQ(0, to_binary(0, 1, buffer, sizeof(buffer)));
     ASSERT_STR_EQ("0", buffer);
     
-    to_binary(0, 6, buffer);
+    ASSERT_EQ(0, to_binary(0, 6, buffer, sizeof(buffer)));
     ASSERT_STR_EQ("000000", buffer);
 }
 
@@ -109,19 +109,19 @@ void test_to_binary_time_values() {
     
     // Test typical time values
     // Hours: 0-23
-    to_binary(23, 5, buffer);  // 23 in 5 bits
+    ASSERT_EQ(0, to_binary(23, 5, buffer, sizeof(buffer)));  // 23 in 5 bits
     ASSERT_STR_EQ("10111", buffer);
     
     // Minutes/Seconds: 0-59
-    to_binary(59, 6, buffer);  // 59 in 6 bits
+    ASSERT_EQ(0, to_binary(59, 6, buffer, sizeof(buffer)));  // 59 in 6 bits
     ASSERT_STR_EQ("111011", buffer);
     
     // Test tens and units splitting
     // 23 hours: 2 tens, 3 units
-    to_binary(2, 4, buffer);
+    ASSERT_EQ(0, to_binary(2, 4, buffer, sizeof(buffer)));
     ASSERT_STR_EQ("0010", buffer);
     
-    to_binary(3, 4, buffer);
+    ASSERT_EQ(0, to_binary(3, 4, buffer, sizeof(buffer)));
     ASSERT_STR_EQ("0011", buffer);
 }
 
@@ -192,7 +192,7 @@ void test_buffer_safety() {
     buffer[9] = '\0'; // Ensure null termination for safety
     
     // Test that to_binary doesn't write beyond expected bounds
-    to_binary(15, 4, buffer);
+    ASSERT_EQ(0, to_binary(15, 4, buffer, sizeof(buffer)));
     ASSERT_STR_EQ("1111", buffer);
     // Check that position 4 is null terminator and position 5 is still 'X'
     ASSERT_EQ('\0', buffer[4]);
@@ -203,10 +203,17 @@ void test_buffer_safety() {
     buffer[9] = '\0';
     
     // Test 6-bit conversion
-    to_binary(63, 6, buffer);
+    ASSERT_EQ(0, to_binary(63, 6, buffer, sizeof(buffer)));
     ASSERT_STR_EQ("111111", buffer);
     ASSERT_EQ('\0', buffer[6]);
     ASSERT_EQ('X', buffer[7]);
+
+    // Ensure function returns error when buffer is too small
+    char small[4];
+    memset(small, 'Z', sizeof(small));
+    int err = to_binary(15, 4, small, sizeof(small));
+    ASSERT_EQ(-1, err);
+    ASSERT_EQ('Z', small[0]); // buffer should remain untouched
 }
 
 // Performance test
@@ -216,7 +223,7 @@ void test_performance() {
     
     // Run to_binary many times to check performance
     for (int i = 0; i < 100000; i++) {
-        to_binary(i % 64, 6, buffer);
+        to_binary(i % 64, 6, buffer, sizeof(buffer));
     }
     
     clock_t end = clock();
@@ -262,25 +269,25 @@ void test_realistic_time_scenarios() {
         // Test hours
         int hours_tens = test_cases[i].hours / 10;
         int hours_units = test_cases[i].hours % 10;
-        to_binary(hours_tens, 4, buffer);
+        to_binary(hours_tens, 4, buffer, sizeof(buffer));
         printf("  Hours tens (%d): %s\n", hours_tens, buffer);
-        to_binary(hours_units, 4, buffer);
+        to_binary(hours_units, 4, buffer, sizeof(buffer));
         printf("  Hours units (%d): %s\n", hours_units, buffer);
         
         // Test minutes
         int minutes_tens = test_cases[i].minutes / 10;
         int minutes_units = test_cases[i].minutes % 10;
-        to_binary(minutes_tens, 3, buffer);
+        to_binary(minutes_tens, 3, buffer, sizeof(buffer));
         printf("  Minutes tens (%d): %s\n", minutes_tens, buffer);
-        to_binary(minutes_units, 4, buffer);
+        to_binary(minutes_units, 4, buffer, sizeof(buffer));
         printf("  Minutes units (%d): %s\n", minutes_units, buffer);
         
         // Test seconds
         int seconds_tens = test_cases[i].seconds / 10;
         int seconds_units = test_cases[i].seconds % 10;
-        to_binary(seconds_tens, 3, buffer);
+        to_binary(seconds_tens, 3, buffer, sizeof(buffer));
         printf("  Seconds tens (%d): %s\n", seconds_tens, buffer);
-        to_binary(seconds_units, 4, buffer);
+        to_binary(seconds_units, 4, buffer, sizeof(buffer));
         printf("  Seconds units (%d): %s\n", seconds_units, buffer);
         
         tests_run++;
