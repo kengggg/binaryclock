@@ -1,13 +1,25 @@
-#define _POSIX_C_SOURCE 200809L  // Enable POSIX functions
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
-#include <unistd.h>
-#include <sys/wait.h>
 #include <string.h>
+
+// Cross-platform compatibility
+#ifdef _WIN32
+    // Windows doesn't support fork/signal testing the same way
+    // We'll skip the signal test on Windows
+#else
+    #define _POSIX_C_SOURCE 200809L  // Enable POSIX functions
+    #include <unistd.h>
+    #include <sys/wait.h>
+#endif
 
 // Test signal handling by creating a child process
 int test_signal_handler() {
+#ifdef _WIN32
+    // Windows doesn't support fork, skip this test
+    printf("Signal handling test skipped on Windows (no fork support)\n");
+    return 0;
+#else
     pid_t pid = fork();
     
     if (pid == 0) {
@@ -46,6 +58,7 @@ int test_signal_handler() {
         perror("fork failed");
         return 1;
     }
+#endif
 }
 
 int main() {

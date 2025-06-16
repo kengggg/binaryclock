@@ -4,8 +4,12 @@
 #include <assert.h>
 #include <time.h>
 #include <signal.h>
-#include <unistd.h>
-#include <sys/wait.h>
+
+// Cross-platform compatibility
+#ifndef _WIN32
+    #include <unistd.h>
+    #include <sys/wait.h>
+#endif
 
 // Include the functions we want to test
 #include "binary_clock_lib.h"
