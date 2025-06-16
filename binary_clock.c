@@ -1,8 +1,18 @@
 #include <stdio.h>    // For printf
 #include <time.h>     // For time functions
-#include <unistd.h>   // For sleep (Unix-like systems)
 #include <stdlib.h>   // For system
 #include <signal.h>   // For signal handling
+
+// Cross-platform compatibility
+#ifdef _WIN32
+    #include <windows.h>  // For Sleep on Windows
+    #define CLEAR_COMMAND "cls"
+    #define SLEEP_FUNC(x) Sleep((x) * 1000)  // Windows Sleep uses milliseconds
+#else
+    #include <unistd.h>   // For sleep on Unix-like systems
+    #define CLEAR_COMMAND "clear"
+    #define SLEEP_FUNC(x) sleep(x)  // Unix sleep uses seconds
+#endif
 
 // Function to convert an integer to binary string
 // Thread-safe version that uses provided buffer
@@ -66,7 +76,7 @@ int main() {
         to_binary(seconds_units, 4, seconds_col2);
 
         // Display the clock
-        system("clear"); // Clear screen (Unix-like systems)
+        system(CLEAR_COMMAND); // Clear screen (cross-platform)
         printf("Hours:\n");
         printf("10: ");
         display_binary(hours_tens_bin);
@@ -85,7 +95,7 @@ int main() {
         printf("1: ");
         display_binary(seconds_col2);
 
-        sleep(1); // Wait 1 second
+        SLEEP_FUNC(1); // Wait 1 second (cross-platform)
     }
     return 0;
 }

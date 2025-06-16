@@ -39,7 +39,9 @@ gcc -o binary_clock binary_clock.c
 
 ## Key Implementation Details
 
-- Uses `system("clear")` for screen clearing (Unix-specific)
+- Cross-platform compatibility (Windows, macOS, Linux)
+- Uses appropriate screen clearing commands per platform (`cls` on Windows, `clear` on Unix)
+- Cross-platform sleep functions (Windows `Sleep()` vs Unix `sleep()`)
 - Time components split into tens and units for proper binary clock display
 - Thread-safe `to_binary()` function using caller-provided buffers
 - Comprehensive test coverage with 41+ test cases

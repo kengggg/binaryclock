@@ -1,0 +1,55 @@
+# Build artifacts
+binary_clock
+binary_clock.exe
+test_binary_clock
+test_binary_clock.exe
+test_signal_handling
+test_signal_handling.exe
+*.o
+*.obj
+
+# Debug information
+*.dSYM/
+*.pdb
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# System files
+Thumbs.db
+Desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Backup files
+*.bak
+*.backup
+
+# Coverage and profiling
+*.gcov
+*.gcda
+*.gcno
+gmon.out
+
+# Static analysis
+cppcheck.xml
+*.sarif
+
+# Package managers (if used)
+node_modules/
+.npm/
+
+# OS specific
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+ehthumbs.db

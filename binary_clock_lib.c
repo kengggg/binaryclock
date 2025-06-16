@@ -1,8 +1,14 @@
 #include <stdio.h>
 #include <time.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <signal.h>
+
+// Cross-platform compatibility
+#ifdef _WIN32
+    #include <windows.h>  // For Sleep on Windows
+#else
+    #include <unistd.h>   // For sleep on Unix-like systems
+#endif
 
 // Function to convert an integer to binary string
 // Thread-safe version that uses provided buffer

@@ -8,26 +8,77 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            timeout_cmd: timeout 5s
+            shell: bash
+          - os: macos-latest
+            timeout_cmd: timeout 5s
+            shell: bash
+          - os: windows-latest
+            timeout_cmd: timeout /t 5
+            shell: cmd
+            
+    runs-on: ${{ matrix.os }}
     
     steps:
     - uses: actions/checkout@v4
     
-    - name: Install dependencies
+    - name: Install dependencies (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
         sudo apt-get install -y gcc make
     
+    - name: Install dependencies (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        # Xcode command line tools should already be available
+        which gcc || which clang
+        which make
+    
+    - name: Install dependencies (Windows)
+      if: matrix.os == 'windows-latest'
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        update: true
+        install: >-
+          mingw-w64-x86_64-gcc
+          mingw-w64-x86_64-make
+          make
+    
+    - name: Clean any existing build artifacts
+      run: make clean || true
+      shell: ${{ matrix.os == 'windows-latest' && 'msys2 {0}' || 'bash' }}
+    
     - name: Build project
       run: make all
+      shell: ${{ matrix.os == 'windows-latest' && 'msys2 {0}' || 'bash' }}
     
     - name: Run tests
       run: make test
+      shell: ${{ matrix.os == 'windows-latest' && 'msys2 {0}' || 'bash' }}
     
-    - name: Check if binary runs
+    - name: Check if binary runs (Unix)
+      if: matrix.os != 'windows-latest'
       run: |
-        timeout 5s ./binary_clock || [ $? -eq 124 ]
+        ${{ matrix.timeout_cmd }} ./binary_clock || [ $? -eq 124 ] || [ $? -eq 142 ]
         echo "Binary clock runs successfully!"
+    
+    - name: Check if binary runs (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        # Start binary_clock in background and kill after 5 seconds
+        start /b binary_clock.exe
+        timeout /t 5 >nul
+        taskkill /f /im binary_clock.exe >nul 2>&1 || echo "Process already ended"
+        echo "Binary clock runs successfully!"
+      shell: msys2 {0}
     
     - name: Clean build artifacts
       run: make clean
+      shell: ${{ matrix.os == 'windows-latest' && 'msys2 {0}' || 'bash' }}

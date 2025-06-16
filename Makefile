@@ -1,7 +1,23 @@
-CC = gcc
+# Cross-platform configuration
+ifeq ($(OS),Windows_NT)
+    CC = gcc
+    TARGET = binary_clock.exe
+    TEST_TARGET = test_binary_clock.exe
+    SIGNAL_TEST = test_signal_handling.exe
+    RM = del /Q
+    MKDIR = mkdir
+    PATHSEP = \\
+else
+    CC = gcc
+    TARGET = binary_clock
+    TEST_TARGET = test_binary_clock
+    SIGNAL_TEST = test_signal_handling
+    RM = rm -f
+    MKDIR = mkdir -p
+    PATHSEP = /
+endif
+
 CFLAGS = -Wall -Wextra -std=c99 -pedantic -g
-TARGET = binary_clock
-TEST_TARGET = test_binary_clock
 LIB_OBJ = binary_clock_lib.o
 
 # Default target
@@ -16,25 +32,34 @@ $(LIB_OBJ): binary_clock_lib.c binary_clock_lib.h
 	$(CC) $(CFLAGS) -c binary_clock_lib.c
 
 # Build and run tests
-test: $(TEST_TARGET) test_signal_handling
+test: $(TEST_TARGET) $(SIGNAL_TEST)
+ifeq ($(OS),Windows_NT)
+	$(TEST_TARGET)
+	$(SIGNAL_TEST)
+else
 	./$(TEST_TARGET)
-	./test_signal_handling
+	./$(SIGNAL_TEST)
+endif
 
 # Build the test executable
 $(TEST_TARGET): test_binary_clock.c $(LIB_OBJ)
 	$(CC) $(CFLAGS) -o $(TEST_TARGET) test_binary_clock.c $(LIB_OBJ)
 
 # Build the signal handling test
-test_signal_handling: test_signal_handling.c
-	$(CC) $(CFLAGS) -o test_signal_handling test_signal_handling.c
+$(SIGNAL_TEST): test_signal_handling.c
+	$(CC) $(CFLAGS) -o $(SIGNAL_TEST) test_signal_handling.c
 
 # Clean build artifacts
 clean:
-	rm -f $(TARGET) $(TEST_TARGET) test_signal_handling $(LIB_OBJ)
+	$(RM) $(TARGET) $(TEST_TARGET) $(SIGNAL_TEST) $(LIB_OBJ)
 
 # Run the binary clock
 run: $(TARGET)
+ifeq ($(OS),Windows_NT)
+	$(TARGET)
+else
 	./$(TARGET)
+endif
 
 # Install (simple copy to /usr/local/bin)
 install: $(TARGET)
@@ -44,13 +69,17 @@ install: $(TARGET)
 uninstall:
 	sudo rm -f /usr/local/bin/$(TARGET)
 
-# Check for memory leaks with valgrind (if available)
+# Check for memory leaks with valgrind (if available, Unix only)
 memcheck: $(TEST_TARGET)
+ifeq ($(OS),Windows_NT)
+	@echo "Valgrind not available on Windows, skipping memory check"
+else
 	@if command -v valgrind >/dev/null 2>&1; then \
 		valgrind --leak-check=full --show-leak-kinds=all ./$(TEST_TARGET); \
 	else \
 		echo "Valgrind not available, skipping memory check"; \
 	fi
+endif
 
 # Static analysis with cppcheck (if available)
 analyze:
