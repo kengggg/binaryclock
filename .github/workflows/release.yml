@@ -44,12 +44,10 @@ jobs:
 
       - name: 🏷️ Create Release
         id: create-release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
-          release_name: 🌚🌝 Binary Clock ${{ github.ref_name }}
+          name: 🌚🌝 Binary Clock ${{ github.ref_name }}
           body: |
             # 🌚🌝 Binary Clock Release ${{ github.ref_name }}
             
@@ -134,6 +132,7 @@ jobs:
             💡 **Need help?** Check the [API Reference](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/docs/API_REFERENCE.md) or open an issue!
           draft: false
           prerelease: false
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   build-and-package:
     name: 🔨 Build & Package (${{ matrix.os }})
