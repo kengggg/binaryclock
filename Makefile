@@ -4,9 +4,10 @@ ifeq ($(OS),Windows_NT)
     TARGET = binary_clock.exe
     TEST_TARGET = test_binary_clock.exe
     SIGNAL_TEST = test_signal_handling.exe
-    RM = del /Q
-    MKDIR = mkdir
-    PATHSEP = \\
+    # MSYS2 provides Unix-like commands
+    RM = rm -f
+    MKDIR = mkdir -p
+    PATHSEP = /
 else
     CC = gcc
     TARGET = binary_clock
@@ -34,8 +35,8 @@ $(LIB_OBJ): binary_clock_lib.c binary_clock_lib.h
 # Build and run tests
 test: $(TEST_TARGET) $(SIGNAL_TEST)
 ifeq ($(OS),Windows_NT)
-	$(TEST_TARGET)
-	$(SIGNAL_TEST)
+	./$(TEST_TARGET)
+	./$(SIGNAL_TEST)
 else
 	./$(TEST_TARGET)
 	./$(SIGNAL_TEST)
@@ -56,7 +57,7 @@ clean:
 # Run the binary clock
 run: $(TARGET)
 ifeq ($(OS),Windows_NT)
-	$(TARGET)
+	./$(TARGET)
 else
 	./$(TARGET)
 endif
