@@ -25,24 +25,24 @@ Choose your path based on what you want to do:
 
 ### 🍎 **Widget Developer** (2 minutes to integration)
 ```bash
-# Download API-only package
-curl -L https://github.com/kengggg/binaryclock/releases/latest/download/binary-clock-api-v1.0.0.tar.gz | tar xz
+# Download API-only package (replace v0.1.0 with latest version)
+curl -L https://github.com/kengggg/binaryclock/releases/download/v0.1.0/binary-clock-api-v0.1.0.tar.gz | tar xz
 cd api-only && make
 ```
 **→ [Complete Widget Guide](docs/QUICKSTART-WIDGET.md)**
 
 ### 💻 **CLI User** (30 seconds to running)
 ```bash
-# Download ready-to-run binary (Linux example)
-curl -L https://github.com/kengggg/binaryclock/releases/latest/download/binary-clock-cli-v1.0.0-linux-x86_64.tar.gz | tar xz
+# Download ready-to-run binary (Linux example - replace v0.1.0 with latest version)
+curl -L https://github.com/kengggg/binaryclock/releases/download/v0.1.0/binary-clock-cli-v0.1.0-linux-x86_64.tar.gz | tar xz
 cd cli && ./binary_clock --help
 ```
 **→ [Complete CLI Guide](docs/QUICKSTART-CLI.md)**
 
 ### 📚 **Library Developer** (5 minutes to custom app)
 ```bash
-# Download complete library
-curl -L https://github.com/kengggg/binaryclock/releases/latest/download/binary-clock-library-v1.0.0.tar.gz | tar xz
+# Download complete library (replace v0.1.0 with latest version)
+curl -L https://github.com/kengggg/binaryclock/releases/download/v0.1.0/binary-clock-library-v0.1.0.tar.gz | tar xz
 cd library && make
 ```
 **→ [Complete Library Guide](docs/API_REFERENCE.md)**
@@ -70,6 +70,18 @@ We provide multiple distribution formats to serve different use cases:
 - **macOS**: Universal binary (Intel + Apple Silicon)
 - **Windows**: x86_64 (MSYS2/MinGW compatible)
 - **Embedded**: C99 compatible systems
+
+### 🔄 Automated Releases
+
+This project features fully automated releases:
+
+1. **Tag-triggered**: Push a version tag (`git tag v1.0.0 && git push origin v1.0.0`) to automatically trigger release builds
+2. **Cross-platform**: Automatically builds and packages for Linux, macOS, and Windows
+3. **Multiple formats**: Generates persona-specific packages (.tar.gz, .zip) with SHA256 checksums
+4. **Comprehensive**: Includes API-only, CLI binaries, complete library, and source distributions
+5. **Verified**: All packages include checksums for security verification
+
+**Latest Release**: [View all releases →](https://github.com/kengggg/binaryclock/releases)
 
 Press Ctrl+C to gracefully exit continuous mode.
 

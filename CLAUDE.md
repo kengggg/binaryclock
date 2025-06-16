@@ -27,12 +27,20 @@ binaryclock/
 │   └── test_signal_handling.c    # Signal handling tests
 ├── build/                         # Build artifacts (created during compilation)
 ├── docs/                          # Project documentation
-│   ├── binary_clock_api_spec.json    # Machine-readable API specification
-│   └── API_SEPARATION_REQUIREMENTS.md # Business requirements document
+│   ├── binary_clock_api_spec.json         # Machine-readable API specification
+│   ├── API_SEPARATION_REQUIREMENTS.md    # Business requirements document
+│   ├── API_REFERENCE.md                  # Complete API documentation
+│   ├── QUICKSTART-CLI.md                 # CLI user quickstart guide
+│   ├── QUICKSTART-WIDGET.md              # Widget developer quickstart guide
+│   └── SWIFT_INTEGRATION_EXAMPLE.swift   # Swift integration example
 ├── .github/
 │   └── workflows/
-│       └── ci.yml                # CI/CD pipeline with path-based triggers
-├── Makefile                      # Cross-platform build system
+│       ├── ci.yml                # CI/CD pipeline with path-based triggers
+│       └── release.yml           # Automated release workflow
+├── scripts/
+│   └── release/
+│       └── package-api.sh        # API package generation script
+├── Makefile                      # Cross-platform build system with packaging
 └── CLAUDE.md                     # Project documentation
 ```
 
@@ -54,6 +62,42 @@ make clean
 # Manual compilation (if needed)
 gcc -I include -o binary_clock src/binary_clock.c
 ```
+
+## Distribution & Packaging
+
+The project includes comprehensive packaging and automated release capabilities:
+
+```bash
+# Create distribution packages
+make dist-all                 # Create all distribution packages
+make dist-api-only            # API-only package for widget developers
+make dist-cli                 # CLI binary package for end users
+make dist-library             # Complete library package for developers
+
+# Create release archives
+make package-all              # Create all release archives
+make package-api              # Create API package archives (.tar.gz, .zip)
+make package-cli              # Create platform-specific CLI archives
+make package-library          # Create library package archives
+make package-source           # Create source distribution archives
+
+# Complete release preparation
+make prepare-release          # Full release pipeline: build, test, package, checksums
+```
+
+### Automated Releases
+
+The project features automated GitHub Actions releases triggered by version tags:
+
+1. **Tag-based releases**: Push a version tag (`v1.0.0`) to trigger automated release
+2. **Cross-platform builds**: Automatically builds for Linux, macOS, and Windows
+3. **Multiple package formats**: Generates persona-specific packages:
+   - `binary-clock-api-*.tar.gz` - Core API for widget developers
+   - `binary-clock-cli-*-{platform}.{tar.gz|zip}` - Platform-specific CLI binaries
+   - `binary-clock-library-*.tar.gz` - Complete library for developers
+   - `binary-clock-source-*.tar.gz` - Source distribution
+4. **Security**: All packages include SHA256 checksums for verification
+5. **Documentation**: Comprehensive release notes with usage examples
 
 ## Code Architecture
 
