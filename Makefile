@@ -18,19 +18,29 @@ else
     PATHSEP = /
 endif
 
-CFLAGS = -Wall -Wextra -std=c99 -pedantic -g
-LIB_OBJ = binary_clock_lib.o
+# Directory structure
+SRC_DIR = src
+INCLUDE_DIR = include
+TEST_DIR = tests
+BUILD_DIR = build
+
+CFLAGS = -Wall -Wextra -std=c99 -pedantic -g -I$(INCLUDE_DIR)
+LIB_OBJ = $(BUILD_DIR)/binary_clock_lib.o
 
 # Default target
-all: $(TARGET)
+all: $(BUILD_DIR) $(TARGET)
+
+# Create build directory
+$(BUILD_DIR):
+	$(MKDIR) $(BUILD_DIR)
 
 # Build the main binary clock application
-$(TARGET): binary_clock.c
-	$(CC) $(CFLAGS) -o $(TARGET) binary_clock.c
+$(TARGET): $(SRC_DIR)/binary_clock.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRC_DIR)/binary_clock.c
 
 # Build the library object file
-$(LIB_OBJ): binary_clock_lib.c binary_clock_lib.h
-	$(CC) $(CFLAGS) -c binary_clock_lib.c
+$(LIB_OBJ): $(SRC_DIR)/binary_clock_lib.c $(INCLUDE_DIR)/binary_clock_lib.h | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/binary_clock_lib.c -o $(LIB_OBJ)
 
 # Build and run tests
 test: $(TEST_TARGET) $(SIGNAL_TEST)
@@ -43,16 +53,17 @@ else
 endif
 
 # Build the test executable
-$(TEST_TARGET): test_binary_clock.c $(LIB_OBJ)
-	$(CC) $(CFLAGS) -o $(TEST_TARGET) test_binary_clock.c $(LIB_OBJ)
+$(TEST_TARGET): $(TEST_DIR)/test_binary_clock.c $(LIB_OBJ) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -o $(TEST_TARGET) $(TEST_DIR)/test_binary_clock.c $(LIB_OBJ)
 
 # Build the signal handling test
-$(SIGNAL_TEST): test_signal_handling.c
-	$(CC) $(CFLAGS) -o $(SIGNAL_TEST) test_signal_handling.c
+$(SIGNAL_TEST): $(TEST_DIR)/test_signal_handling.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -o $(SIGNAL_TEST) $(TEST_DIR)/test_signal_handling.c
 
 # Clean build artifacts
 clean:
 	$(RM) $(TARGET) $(TEST_TARGET) $(SIGNAL_TEST) $(LIB_OBJ)
+	$(RM) -r $(BUILD_DIR)
 
 # Run the binary clock
 run: $(TARGET)
@@ -85,7 +96,7 @@ endif
 # Static analysis with cppcheck (if available)
 analyze:
 	@if command -v cppcheck >/dev/null 2>&1; then \
-		cppcheck --enable=all --std=c99 *.c *.h; \
+		cppcheck --enable=all --std=c99 $(SRC_DIR)/*.c $(INCLUDE_DIR)/*.h $(TEST_DIR)/*.c; \
 	else \
 		echo "cppcheck not available, skipping static analysis"; \
 	fi
@@ -93,7 +104,7 @@ analyze:
 # Format code (if clang-format is available)
 format:
 	@if command -v clang-format >/dev/null 2>&1; then \
-		clang-format -i *.c *.h; \
+		clang-format -i $(SRC_DIR)/*.c $(INCLUDE_DIR)/*.h $(TEST_DIR)/*.c; \
 		echo "Code formatted"; \
 	else \
 		echo "clang-format not available, skipping formatting"; \

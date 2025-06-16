@@ -1,6 +1,6 @@
 # 🌚🌝 Binary Clock 🌝🌚
 
-[![CI](https://github.com/USERNAME/binaryclock/actions/workflows/ci.yml/badge.svg)](https://github.com/USERNAME/binaryclock/actions/workflows/ci.yml)
+[![CI](https://github.com/kengggg/binaryclock/actions/workflows/ci.yml/badge.svg)](https://github.com/kengggg/binaryclock/actions/workflows/ci.yml)
 
 A delightfully lunar way to tell time! This C program displays the current time in binary format using moon emojis - because who needs boring decimal digits when you can have 🌚 (0) and 🌝 (1)?
 
@@ -48,12 +48,21 @@ Example: If it's 13:37:42
 - Minutes: 3 (🌚🌚🌝🌝) and 7 (🌚🌝🌝🌝)
 - Seconds: 4 (🌚🌝🌚🌚) and 2 (🌚🌚🌝🌚)
 
-## Files
+## Project Structure
 
-- `binary_clock.c` - Main application logic
-- `binary_clock_lib.c/h` - Reusable library functions
-- `test_*.c` - Comprehensive test suite
-- `Makefile` - Build system that makes everything work
+```
+binaryclock/
+├── src/                    # Source code files
+│   ├── binary_clock.c     # Main application logic
+│   └── binary_clock_lib.c # Library implementation
+├── include/               # Header files
+│   └── binary_clock_lib.h # Library header
+├── tests/                 # Test files
+│   ├── test_binary_clock.c
+│   └── test_signal_handling.c
+├── build/                 # Build artifacts (auto-created)
+└── Makefile              # Cross-platform build system
+```
 
 ## Credits
 
