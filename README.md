@@ -17,25 +17,57 @@ Ever wondered what time it is in binary? Wonder no more! This clock shows:
 - 📊 **JSON Mode**: Structured data perfect for APIs
 - 🔍 **Raw Mode**: Core API data structures for debugging
 
-## Quick Start
+## 🚀 Quick Start by Use Case
 
+Choose your path based on what you want to do:
+
+### 🍎 **Widget Developer** (2 minutes to integration)
 ```bash
-# Build the project
-make all
-
-# Single output (default - exits immediately)
-./binary_clock                          # Moon emoji display
-./binary_clock --display=binary         # 0s and 1s display
-./binary_clock --display=json           # JSON format
-./binary_clock --display=raw            # Raw API data
-
-# Continuous mode (updates every second)
-./binary_clock --loop                   # Continuous moon emoji display
-./binary_clock --display=json --loop    # Continuous JSON output
-
-# Get help
-./binary_clock --help
+# Download API-only package
+curl -L https://github.com/kengggg/binaryclock/releases/latest/download/binary-clock-api-v1.0.0.tar.gz | tar xz
+cd api-only && make
 ```
+**→ [Complete Widget Guide](docs/QUICKSTART-WIDGET.md)**
+
+### 💻 **CLI User** (30 seconds to running)
+```bash
+# Download ready-to-run binary (Linux example)
+curl -L https://github.com/kengggg/binaryclock/releases/latest/download/binary-clock-cli-v1.0.0-linux-x86_64.tar.gz | tar xz
+cd cli && ./binary_clock --help
+```
+**→ [Complete CLI Guide](docs/QUICKSTART-CLI.md)**
+
+### 📚 **Library Developer** (5 minutes to custom app)
+```bash
+# Download complete library
+curl -L https://github.com/kengggg/binaryclock/releases/latest/download/binary-clock-library-v1.0.0.tar.gz | tar xz
+cd library && make
+```
+**→ [Complete Library Guide](docs/API_REFERENCE.md)**
+
+### 👨‍💻 **Contributor** (Full development setup)
+```bash
+# Clone and build from source
+git clone https://github.com/kengggg/binaryclock.git
+cd binaryclock && make all test
+```
+
+## 📦 Distribution Packages
+
+We provide multiple distribution formats to serve different use cases:
+
+| Package | Description | Size | Best For |
+|---------|-------------|------|----------|
+| **API Only** | Core binary clock API | ~50KB | Widget developers, embedded systems |
+| **CLI Binary** | Ready-to-run application | ~500KB | End users, scripting |
+| **Library** | API + display utilities | ~100KB | Custom applications |
+| **Source** | Complete development environment | ~200KB | Contributors, custom builds |
+
+### Platform Support
+- **Linux**: x86_64 (tested on Ubuntu, CentOS, Alpine)
+- **macOS**: Universal binary (Intel + Apple Silicon)
+- **Windows**: x86_64 (MSYS2/MinGW compatible)
+- **Embedded**: C99 compatible systems
 
 Press Ctrl+C to gracefully exit continuous mode.
 

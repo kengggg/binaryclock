@@ -3,6 +3,8 @@ binary_clock
 binary_clock.exe
 test_binary_clock
 test_binary_clock.exe
+test_binary_clock_api
+test_binary_clock_api.exe
 test_signal_handling
 test_signal_handling.exe
 *.o
