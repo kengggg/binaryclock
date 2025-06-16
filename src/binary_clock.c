@@ -1,5 +1,5 @@
 #include <stdio.h>    // For printf
-#include <stdlib.h>   // For system
+#include <stdlib.h>   // For exit
 #include <signal.h>   // For signal handling
 #include <string.h>   // For string comparison
 #include <binary_clock_api.h>     // Core API (data only)
@@ -7,14 +7,39 @@
 
 // Cross-platform compatibility
 #ifdef _WIN32
-    #include <windows.h>  // For Sleep on Windows
-    #define CLEAR_COMMAND "cls"
+    #include <windows.h>  // For Sleep and WinAPI console functions
     #define SLEEP_FUNC(x) Sleep((x) * 1000)  // Windows Sleep uses milliseconds
 #else
     #include <unistd.h>   // For sleep on Unix-like systems
-    #define CLEAR_COMMAND "clear"
     #define SLEEP_FUNC(x) sleep(x)  // Unix sleep uses seconds
 #endif
+
+// Cross-platform console clear
+static void clear_console(void) {
+#ifdef _WIN32
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (hConsole == INVALID_HANDLE_VALUE) {
+        return;
+    }
+
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    if (!GetConsoleScreenBufferInfo(hConsole, &csbi)) {
+        return;
+    }
+
+    DWORD cellCount = csbi.dwSize.X * csbi.dwSize.Y;
+    DWORD count;
+    COORD homeCoords = {0, 0};
+
+    FillConsoleOutputCharacter(hConsole, ' ', cellCount, homeCoords, &count);
+    FillConsoleOutputAttribute(hConsole, csbi.wAttributes, cellCount, homeCoords, &count);
+    SetConsoleCursorPosition(hConsole, homeCoords);
+#else
+    // ANSI escape codes to clear the screen and move the cursor to the top-left
+    printf("\033[2J\033[H");
+    fflush(stdout);
+#endif
+}
 
 // Display mode enumeration
 typedef enum {
@@ -216,7 +241,7 @@ int main(int argc, char* argv[]) {
         while (1) { // Infinite loop to keep clock running
             // Clear screen (cross-platform) - only for non-JSON mode to avoid cluttering
             if (config.display_mode != DISPLAY_JSON) {
-                system(CLEAR_COMMAND);
+                clear_console();
             }
             
             // Update all registered displays with current time
