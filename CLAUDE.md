@@ -16,14 +16,11 @@ binaryclock/
 │   ├── binary_clock.c            # Console application (uses both modules)
 │   ├── binary_clock_api.c        # Core API implementation (data only)
 │   ├── binary_clock_display.c    # Display utilities (visualization)
-│   └── binary_clock_lib.c        # Legacy library (backward compatibility)
 ├── include/                       # Header files
 │   ├── binary_clock_api.h        # Core API header (data only)
 │   ├── binary_clock_display.h    # Display utilities header
-│   └── binary_clock_lib.h        # Legacy library header
 ├── tests/                         # Test files
 │   ├── test_binary_clock_api.c   # Core API tests (186+ tests)
-│   ├── test_binary_clock.c       # Legacy library tests
 │   └── test_signal_handling.c    # Signal handling tests
 ├── build/                         # Build artifacts (created during compilation)
 ├── docs/                          # Project documentation
@@ -119,7 +116,6 @@ The project features automated GitHub Actions releases triggered by version tags
   - Single output mode (default) and continuous loop mode
   - Backward compatibility maintained with --loop option
 
-- **Legacy Library** (`binary_clock_lib.h/.c`): Original implementation for compatibility
 - **Test Suite**: Comprehensive coverage (225+ tests total)
 - **Build System**: `Makefile` handles modular compilation
 - **CI/CD**: `.github/workflows/ci.yml` runs tests on multiple platforms
