@@ -26,6 +26,9 @@ BUILD_DIR = build
 
 CFLAGS = -Wall -Wextra -std=c99 -pedantic -g -I$(INCLUDE_DIR)
 LIB_OBJ = $(BUILD_DIR)/binary_clock_lib.o
+API_OBJ = $(BUILD_DIR)/binary_clock_api.o
+DISPLAY_OBJ = $(BUILD_DIR)/binary_clock_display.o
+API_TEST_TARGET = test_binary_clock_api
 
 # Default target
 all: $(BUILD_DIR) $(TARGET)
@@ -35,21 +38,31 @@ $(BUILD_DIR):
 	$(MKDIR) $(BUILD_DIR)
 
 # Build the main binary clock application
-$(TARGET): $(SRC_DIR)/binary_clock.c | $(BUILD_DIR)
-	$(CC) $(CFLAGS) -o $(TARGET) $(SRC_DIR)/binary_clock.c
+$(TARGET): $(SRC_DIR)/binary_clock.c $(API_OBJ) $(DISPLAY_OBJ) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRC_DIR)/binary_clock.c $(API_OBJ) $(DISPLAY_OBJ)
 
 # Build the library object file
 $(LIB_OBJ): $(SRC_DIR)/binary_clock_lib.c $(INCLUDE_DIR)/binary_clock_lib.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/binary_clock_lib.c -o $(LIB_OBJ)
 
+# Build the API object file
+$(API_OBJ): $(SRC_DIR)/binary_clock_api.c $(INCLUDE_DIR)/binary_clock_api.h | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/binary_clock_api.c -o $(API_OBJ)
+
+# Build the display utilities object file
+$(DISPLAY_OBJ): $(SRC_DIR)/binary_clock_display.c $(INCLUDE_DIR)/binary_clock_display.h $(INCLUDE_DIR)/binary_clock_api.h | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/binary_clock_display.c -o $(DISPLAY_OBJ)
+
 # Build and run tests
-test: $(TEST_TARGET) $(SIGNAL_TEST)
+test: $(TEST_TARGET) $(SIGNAL_TEST) $(API_TEST_TARGET)
 ifeq ($(OS),Windows_NT)
 	./$(TEST_TARGET)
 	./$(SIGNAL_TEST)
+	./$(API_TEST_TARGET)
 else
 	./$(TEST_TARGET)
 	./$(SIGNAL_TEST)
+	./$(API_TEST_TARGET)
 endif
 
 # Build the test executable
@@ -60,9 +73,13 @@ $(TEST_TARGET): $(TEST_DIR)/test_binary_clock.c $(LIB_OBJ) | $(BUILD_DIR)
 $(SIGNAL_TEST): $(TEST_DIR)/test_signal_handling.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -o $(SIGNAL_TEST) $(TEST_DIR)/test_signal_handling.c
 
+# Build the API test executable
+$(API_TEST_TARGET): $(TEST_DIR)/test_binary_clock_api.c $(API_OBJ) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -o $(API_TEST_TARGET) $(TEST_DIR)/test_binary_clock_api.c $(API_OBJ)
+
 # Clean build artifacts
 clean:
-	$(RM) $(TARGET) $(TEST_TARGET) $(SIGNAL_TEST) $(LIB_OBJ)
+	$(RM) $(TARGET) $(TEST_TARGET) $(SIGNAL_TEST) $(API_TEST_TARGET) $(LIB_OBJ) $(API_OBJ) $(DISPLAY_OBJ)
 	$(RM) -r $(BUILD_DIR)
 
 # Run the binary clock

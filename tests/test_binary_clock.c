@@ -12,7 +12,7 @@
 #endif
 
 // Include the functions we want to test
-#include "binary_clock_lib.h"
+#include <binary_clock_lib.h>
 
 // Test framework macros
 #define TEST_PASSED 0

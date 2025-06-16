@@ -1,0 +1,564 @@
+{
+  "api_specification": {
+    "name": "Binary Clock Core API",
+    "version": "1.0.0",
+    "description": "Pure data API for binary clock functionality with complete separation from visualization. Provides only time conversion and binary representation - no display functions.",
+    "compatibility": {
+      "c_standard": "C99",
+      "platforms": ["macOS", "iOS", "Linux", "Windows"],
+      "thread_safety": true,
+      "memory_model": "stack_only"
+    },
+    "separation_principle": "This core API contains ONLY data structures and conversion functions. All visualization is handled by separate display utilities that use this API for data access."
+  },
+  
+  "data_structures": {
+    "binary_value_t": {
+      "description": "Represents a binary value with configurable bit count",
+      "fields": {
+        "bit_count": {
+          "type": "uint8_t",
+          "description": "Number of significant bits (1-6)",
+          "constraints": {
+            "min": 1,
+            "max": 6
+          }
+        },
+        "bits": {
+          "type": "bool[6]",
+          "description": "Bit array (MSB first)",
+          "constraints": {
+            "length": 6,
+            "ordering": "MSB_first"
+          }
+        },
+        "decimal_value": {
+          "type": "uint8_t", 
+          "description": "Original decimal value for reference",
+          "constraints": {
+            "min": 0,
+            "max": 63
+          }
+        }
+      },
+      "memory_layout": {
+        "size_bytes": 8,
+        "alignment": 1
+      }
+    },
+    
+    "time_components_t": {
+      "description": "Standard time representation",
+      "fields": {
+        "hours": {
+          "type": "uint8_t",
+          "description": "Hours in 24-hour format",
+          "constraints": {
+            "min": 0,
+            "max": 23
+          }
+        },
+        "minutes": {
+          "type": "uint8_t", 
+          "description": "Minutes",
+          "constraints": {
+            "min": 0,
+            "max": 59
+          }
+        },
+        "seconds": {
+          "type": "uint8_t",
+          "description": "Seconds", 
+          "constraints": {
+            "min": 0,
+            "max": 59
+          }
+        }
+      },
+      "memory_layout": {
+        "size_bytes": 3,
+        "alignment": 1
+      }
+    },
+    
+    "binary_clock_state_t": {
+      "description": "Complete binary clock state representation",
+      "fields": {
+        "hours_tens": {
+          "type": "binary_value_t",
+          "description": "Hours tens digit (0-2, 3 bits)",
+          "bit_count": 3
+        },
+        "hours_units": {
+          "type": "binary_value_t", 
+          "description": "Hours units digit (0-9, 4 bits)",
+          "bit_count": 4
+        },
+        "minutes_tens": {
+          "type": "binary_value_t",
+          "description": "Minutes tens digit (0-5, 3 bits)", 
+          "bit_count": 3
+        },
+        "minutes_units": {
+          "type": "binary_value_t",
+          "description": "Minutes units digit (0-9, 4 bits)",
+          "bit_count": 4
+        },
+        "seconds_tens": {
+          "type": "binary_value_t",
+          "description": "Seconds tens digit (0-5, 3 bits)",
+          "bit_count": 3
+        },
+        "seconds_units": {
+          "type": "binary_value_t", 
+          "description": "Seconds units digit (0-9, 4 bits)",
+          "bit_count": 4
+        },
+        "timestamp": {
+          "type": "time_t",
+          "description": "Unix timestamp when state was created"
+        }
+      },
+      "memory_layout": {
+        "size_bytes": 56,
+        "alignment": 8
+      }
+    },
+    
+    "binary_clock_display_fn_t": {
+      "description": "Display callback function signature",
+      "type": "function_pointer",
+      "signature": "void (*)(const binary_clock_state_t* state, void* context)",
+      "parameters": {
+        "state": {
+          "type": "const binary_clock_state_t*",
+          "description": "Current binary clock state", 
+          "nullable": false
+        },
+        "context": {
+          "type": "void*",
+          "description": "User-provided context data",
+          "nullable": true
+        }
+      },
+      "return_type": "void"
+    }
+  },
+  
+  "error_codes": {
+    "binary_clock_error_t": {
+      "description": "Error codes returned by API functions",
+      "type": "enum",
+      "values": {
+        "BINARY_CLOCK_SUCCESS": {
+          "value": 0,
+          "description": "Operation completed successfully"
+        },
+        "BINARY_CLOCK_ERROR_INVALID_TIME": {
+          "value": 1,
+          "description": "Invalid time components provided"
+        },
+        "BINARY_CLOCK_ERROR_INVALID_BIT_COUNT": {
+          "value": 2,
+          "description": "Bit count out of valid range (1-6)"
+        },
+        "BINARY_CLOCK_ERROR_NULL_POINTER": {
+          "value": 3, 
+          "description": "Null pointer passed to function requiring valid pointer"
+        },
+        "BINARY_CLOCK_ERROR_SYSTEM_TIME": {
+          "value": 4,
+          "description": "System time retrieval failed"
+        }
+      }
+    }
+  },
+  
+  "functions": {
+    "core_api": {
+      "binary_clock_get_current_state": {
+        "description": "Get current binary clock state using system time",
+        "signature": "binary_clock_state_t binary_clock_get_current_state(void)",
+        "parameters": {},
+        "return_type": "binary_clock_state_t",
+        "return_description": "Binary clock state for current time",
+        "thread_safety": true,
+        "memory_allocation": false,
+        "performance": {
+          "max_execution_time_ms": 1,
+          "typical_execution_time_us": 50
+        },
+        "error_handling": {
+          "errors": ["BINARY_CLOCK_ERROR_SYSTEM_TIME"],
+          "error_return": "state with timestamp=0 on failure"
+        },
+        "example_usage": "binary_clock_state_t state = binary_clock_get_current_state();"
+      },
+      
+      "binary_clock_state_from_time": {
+        "description": "Create binary clock state from specific time",
+        "signature": "binary_clock_state_t binary_clock_state_from_time(const time_components_t* time)",
+        "parameters": {
+          "time": {
+            "type": "const time_components_t*",
+            "description": "Time components to convert",
+            "nullable": false,
+            "validation": "hours 0-23, minutes 0-59, seconds 0-59"
+          }
+        },
+        "return_type": "binary_clock_state_t",
+        "return_description": "Binary clock state for specified time",
+        "thread_safety": true,
+        "memory_allocation": false,
+        "performance": {
+          "max_execution_time_ms": 1,
+          "typical_execution_time_us": 10
+        },
+        "error_handling": {
+          "errors": ["BINARY_CLOCK_ERROR_NULL_POINTER", "BINARY_CLOCK_ERROR_INVALID_TIME"],
+          "error_return": "state with timestamp=0 on failure"
+        },
+        "example_usage": "time_components_t time = {14, 30, 45}; binary_clock_state_t state = binary_clock_state_from_time(&time);"
+      },
+      
+      "binary_clock_get_current_time": {
+        "description": "Create time components from current system time",
+        "signature": "time_components_t binary_clock_get_current_time(void)",
+        "parameters": {},
+        "return_type": "time_components_t", 
+        "return_description": "Current time as components",
+        "thread_safety": true,
+        "memory_allocation": false,
+        "performance": {
+          "max_execution_time_ms": 1,
+          "typical_execution_time_us": 20
+        },
+        "error_handling": {
+          "errors": ["BINARY_CLOCK_ERROR_SYSTEM_TIME"],
+          "error_return": "time with all fields = 0 on failure"
+        },
+        "example_usage": "time_components_t now = binary_clock_get_current_time();"
+      }
+    },
+    
+    "binary_conversion": {
+      "binary_clock_to_binary": {
+        "description": "Convert decimal number to binary representation",
+        "signature": "binary_value_t binary_clock_to_binary(uint8_t value, uint8_t bit_count)",
+        "parameters": {
+          "value": {
+            "type": "uint8_t",
+            "description": "Decimal value to convert",
+            "constraints": {
+              "min": 0,
+              "max": 63
+            }
+          },
+          "bit_count": {
+            "type": "uint8_t",
+            "description": "Number of bits to represent",
+            "constraints": {
+              "min": 1,
+              "max": 6
+            }
+          }
+        },
+        "return_type": "binary_value_t",
+        "return_description": "Binary representation",
+        "thread_safety": true,
+        "memory_allocation": false,
+        "performance": {
+          "max_execution_time_ms": 1,
+          "typical_execution_time_us": 5
+        },
+        "error_handling": {
+          "errors": ["BINARY_CLOCK_ERROR_INVALID_BIT_COUNT"],
+          "error_return": "binary_value with bit_count=0 on failure"
+        },
+        "validation": {
+          "value_range_check": "value must fit in bit_count bits",
+          "overflow_behavior": "truncate to bit_count bits"
+        },
+        "example_usage": "binary_value_t bin = binary_clock_to_binary(7, 4); // 0111 in 4 bits"
+      },
+      
+      "binary_clock_to_decimal": {
+        "description": "Convert binary representation back to decimal",
+        "signature": "uint8_t binary_clock_to_decimal(const binary_value_t* binary)",
+        "parameters": {
+          "binary": {
+            "type": "const binary_value_t*",
+            "description": "Binary representation to convert",
+            "nullable": false
+          }
+        },
+        "return_type": "uint8_t",
+        "return_description": "Decimal value",
+        "thread_safety": true,
+        "memory_allocation": false,
+        "performance": {
+          "max_execution_time_ms": 1,
+          "typical_execution_time_us": 5
+        },
+        "error_handling": {
+          "errors": ["BINARY_CLOCK_ERROR_NULL_POINTER"],
+          "error_return": "0 on failure"
+        },
+        "example_usage": "uint8_t decimal = binary_clock_to_decimal(&binary_value);"
+      }
+    },
+    
+    "display_utilities_note": {
+      "description": "Display and visualization functions are provided in a separate module",
+      "module_name": "binary_clock_display.h",
+      "rationale": "Complete separation of concerns - core API provides only data, display utilities handle visualization",
+      "functions_available": [
+        "binary_clock_display_console_emoji()",
+        "binary_clock_display_console_ascii()", 
+        "binary_clock_display_json()",
+        "binary_clock_display_compact()",
+        "binary_clock_display_register()",
+        "binary_clock_display_update_all()"
+      ],
+      "usage_example": "Include both binary_clock_api.h and binary_clock_display.h to use visualization features"
+    },
+    
+    "utility_functions": {
+      "binary_clock_get_error_string": {
+        "description": "Get human-readable error message",
+        "signature": "const char* binary_clock_get_error_string(binary_clock_error_t error)",
+        "parameters": {
+          "error": {
+            "type": "binary_clock_error_t",
+            "description": "Error code to get message for"
+          }
+        },
+        "return_type": "const char*",
+        "return_description": "Human-readable error description",
+        "thread_safety": true,
+        "memory_allocation": false,
+        "example_usage": "printf(\"Error: %s\\n\", binary_clock_get_error_string(error));"
+      },
+      
+      "binary_clock_get_version": {
+        "description": "Get API version information",
+        "signature": "const char* binary_clock_get_version(void)",
+        "parameters": {},
+        "return_type": "const char*",
+        "return_description": "Version string in semver format",
+        "thread_safety": true,
+        "memory_allocation": false,
+        "example_usage": "printf(\"Binary Clock API v%s\\n\", binary_clock_get_version());"
+      }
+    }
+  },
+  
+  "usage_examples": {
+    "widget_update_cycle": {
+      "description": "Typical widget update pattern",
+      "code": [
+        "// In widget update function (called every second)",
+        "binary_clock_state_t state = binary_clock_get_current_state();",
+        "",
+        "// Render hours tens (3 bits)",
+        "for (int i = 0; i < state.hours_tens.bit_count; i++) {",
+        "    draw_led(x + i * LED_WIDTH, y, state.hours_tens.bits[i]);",
+        "}",
+        "",
+        "// Render hours units (4 bits)", 
+        "for (int i = 0; i < state.hours_units.bit_count; i++) {",
+        "    draw_led(x + i * LED_WIDTH, y + LED_HEIGHT, state.hours_units.bits[i]);",
+        "}",
+        "",
+        "// Continue for minutes and seconds..."
+      ]
+    },
+    
+    "core_api_only": {
+      "description": "Using core API for data only",
+      "code": [
+        "#include \"binary_clock_api.h\"",
+        "",
+        "int main() {",
+        "    while (running) {",
+        "        // Get pure binary data from core API",
+        "        binary_clock_state_t state = binary_clock_get_current_state();",
+        "        ",
+        "        // Use the raw binary data however you want",
+        "        printf(\"Time: %d%d:%d%d:%d%d\\n\",",
+        "               state.hours_tens.decimal_value, state.hours_units.decimal_value,",
+        "               state.minutes_tens.decimal_value, state.minutes_units.decimal_value,",
+        "               state.seconds_tens.decimal_value, state.seconds_units.decimal_value);",
+        "        ",
+        "        sleep(1);",
+        "    }",
+        "    return 0;",
+        "}"
+      ]
+    },
+    
+    "with_display_utilities": {
+      "description": "Using core API + display utilities",
+      "code": [
+        "#include \"binary_clock_api.h\"      // Core data functions",
+        "#include \"binary_clock_display.h\"  // Visualization functions",
+        "",
+        "int main() {",
+        "    // Register emoji display from display utilities module",
+        "    binary_clock_display_register(binary_clock_display_console_emoji, NULL);",
+        "    ",
+        "    while (running) {",
+        "        system(\"clear\");",
+        "        // Display utilities use core API internally",
+        "        binary_clock_display_update_all();",
+        "        sleep(1);",
+        "    }",
+        "    return 0;",
+        "}"
+      ]
+    },
+    
+    "custom_display": {
+      "description": "Custom LED matrix display using core API data",
+      "code": [
+        "#include \"binary_clock_api.h\"  // For binary_clock_state_t and data access",
+        "",
+        "void update_led_matrix() {",
+        "    // Get raw binary data from core API",
+        "    binary_clock_state_t state = binary_clock_get_current_state();",
+        "    ",
+        "    // Clear matrix",
+        "    led_matrix_clear(&matrix);",
+        "    ",
+        "    // Map hours tens to row 0 using core API data",
+        "    for (int i = 0; i < state.hours_tens.bit_count; i++) {",
+        "        led_matrix_set(&matrix, 0, i, state.hours_tens.bits[i]);",
+        "    }",
+        "    ",
+        "    // Map hours units to row 1 using core API data", 
+        "    for (int i = 0; i < state.hours_units.bit_count; i++) {",
+        "        led_matrix_set(&matrix, 1, i, state.hours_units.bits[i]);",
+        "    }",
+        "    ",
+        "    // Continue for minutes/seconds using core API data...",
+        "    ",
+        "    // Update physical display",
+        "    led_matrix_update(&matrix);",
+        "}"
+      ]
+    },
+    
+    "web_service": {
+      "description": "JSON API endpoint using both core API and display utilities",
+      "code": [
+        "#include \"binary_clock_api.h\"      // Core data",
+        "#include \"binary_clock_display.h\"  // JSON formatting",
+        "",
+        "void handle_api_request(http_request_t* req, http_response_t* res) {",
+        "    // Get raw data from core API",
+        "    binary_clock_state_t state = binary_clock_get_current_state();",
+        "    ",
+        "    // Set JSON content type",
+        "    http_set_header(res, \"Content-Type\", \"application/json\");",
+        "    ",
+        "    // Use display utilities for JSON formatting",
+        "    binary_clock_display_json(&state, res->body);",
+        "    ",
+        "    http_send_response(res, 200);",
+        "}"
+      ]
+    }
+  },
+  
+  "test_cases": {
+    "unit_tests": {
+      "test_binary_conversion": {
+        "description": "Test binary conversion functions",
+        "cases": [
+          {
+            "input": {"value": 7, "bit_count": 4},
+            "expected_bits": [false, true, true, true, false, false],
+            "expected_decimal": 7
+          },
+          {
+            "input": {"value": 0, "bit_count": 3},
+            "expected_bits": [false, false, false, false, false, false],
+            "expected_decimal": 0
+          },
+          {
+            "input": {"value": 63, "bit_count": 6},
+            "expected_bits": [true, true, true, true, true, true],
+            "expected_decimal": 63
+          }
+        ]
+      },
+      
+      "test_time_components": {
+        "description": "Test time component validation",
+        "cases": [
+          {
+            "input": {"hours": 14, "minutes": 30, "seconds": 45},
+            "expected": "success"
+          },
+          {
+            "input": {"hours": 24, "minutes": 30, "seconds": 45},
+            "expected": "BINARY_CLOCK_ERROR_INVALID_TIME"
+          },
+          {
+            "input": {"hours": 14, "minutes": 60, "seconds": 45},
+            "expected": "BINARY_CLOCK_ERROR_INVALID_TIME"
+          }
+        ]
+      }
+    },
+    
+    "performance_tests": {
+      "state_query_performance": {
+        "description": "Measure state query performance",
+        "requirement": "< 1ms execution time",
+        "test": "1000 consecutive calls to binary_clock_get_current_state()"
+      },
+      
+      "display_update_performance": {
+        "description": "Measure display update performance", 
+        "requirement": "Support 60Hz refresh rate",
+        "test": "Update 4 registered displays 60 times per second for 10 seconds"
+      }
+    }
+  },
+  
+  "platform_specific": {
+    "macOS_widget": {
+      "recommended_usage": "SwiftUI with C interop",
+      "update_frequency": "1 second via Timer",
+      "memory_considerations": "Stack allocation only, suitable for widget context",
+      "thread_safety": "API calls safe from main thread and background queues"
+    },
+    
+    "embedded_systems": {
+      "memory_footprint": "< 1KB RAM, < 4KB Flash",
+      "recommended_compiler_flags": ["-Os", "-fdata-sections", "-ffunction-sections"],
+      "optional_features": "Display system can be excluded for minimal builds"
+    },
+    
+    "web_services": {
+      "json_output": "Compatible with REST APIs",
+      "cors_considerations": "JSON output includes timestamp for caching",
+      "performance": "Suitable for high-frequency polling"
+    }
+  },
+  
+  "migration_guide": {
+    "from_current_implementation": {
+      "breaking_changes": "None - existing console app will continue to work",
+      "new_features": "Access to raw binary data, multiple display formats",
+      "performance_improvements": "Reduced string allocation, faster binary conversion",
+      "steps": [
+        "1. Include new binary_clock_api.h",
+        "2. Replace direct function calls with API calls",
+        "3. Optionally migrate to callback-based display system",
+        "4. Test with existing functionality"
+      ]
+    }
+  }
+}

@@ -85,33 +85,64 @@ jobs:
       run: make test
       shell: msys2 {0}
     
-    - name: Check if binary runs (Ubuntu)
+    - name: Test CLI functionality (Ubuntu)
       if: matrix.os == 'ubuntu-latest'
       run: |
-        timeout 5s ./binary_clock || [ $? -eq 124 ] || [ $? -eq 142 ]
-        echo "Binary clock runs successfully!"
+        echo "Testing help functionality..."
+        ./binary_clock --help
+        echo "Testing default single output (emoji)..."
+        ./binary_clock
+        echo "Testing binary display mode..."
+        ./binary_clock --display=binary
+        echo "Testing JSON display mode..."
+        ./binary_clock --display=json
+        echo "Testing raw API display mode..."
+        ./binary_clock --display=raw
+        echo "Testing loop mode briefly..."
+        timeout 3s ./binary_clock --loop || [ $? -eq 124 ] || [ $? -eq 142 ]
+        echo "All CLI tests passed successfully!"
     
-    - name: Check if binary runs (macOS)
+    - name: Test CLI functionality (macOS)
       if: matrix.os == 'macos-latest'
       run: |
-        # Start binary_clock in background and kill after 5 seconds
-        ./binary_clock &
+        echo "Testing help functionality..."
+        ./binary_clock --help
+        echo "Testing default single output (emoji)..."
+        ./binary_clock
+        echo "Testing binary display mode..."
+        ./binary_clock --display=binary
+        echo "Testing JSON display mode..."
+        ./binary_clock --display=json
+        echo "Testing raw API display mode..."
+        ./binary_clock --display=raw
+        echo "Testing loop mode briefly..."
+        ./binary_clock --loop &
         CLOCK_PID=$!
-        sleep 5
+        sleep 3
         kill $CLOCK_PID 2>/dev/null || true
         wait $CLOCK_PID 2>/dev/null || true
-        echo "Binary clock runs successfully!"
+        echo "All CLI tests passed successfully!"
     
-    - name: Check if binary runs (Windows)
+    - name: Test CLI functionality (Windows)
       if: matrix.os == 'windows-latest'
       run: |
-        # Start binary_clock in background and kill after 5 seconds
-        ./binary_clock.exe &
+        echo "Testing help functionality..."
+        ./binary_clock.exe --help
+        echo "Testing default single output (emoji)..."
+        ./binary_clock.exe
+        echo "Testing binary display mode..."
+        ./binary_clock.exe --display=binary
+        echo "Testing JSON display mode..."
+        ./binary_clock.exe --display=json
+        echo "Testing raw API display mode..."
+        ./binary_clock.exe --display=raw
+        echo "Testing loop mode briefly..."
+        ./binary_clock.exe --loop &
         CLOCK_PID=$!
-        sleep 5
+        sleep 3
         kill $CLOCK_PID 2>/dev/null || true
         wait $CLOCK_PID 2>/dev/null || true
-        echo "Binary clock runs successfully!"
+        echo "All CLI tests passed successfully!"
       shell: msys2 {0}
     
     - name: Clean build artifacts (Unix)
