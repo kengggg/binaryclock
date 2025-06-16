@@ -144,7 +144,11 @@ RELEASE_DIR = release
 # Distribution targets
 dist-api-only: $(API_OBJ)
 	@echo "📦 Creating API-only distribution package..."
-	$(MKDIR) $(DIST_DIR)/api-only/{include,src,docs,examples}
+	$(MKDIR) $(DIST_DIR)/api-only
+	$(MKDIR) $(DIST_DIR)/api-only/include
+	$(MKDIR) $(DIST_DIR)/api-only/src
+	$(MKDIR) $(DIST_DIR)/api-only/docs
+	$(MKDIR) $(DIST_DIR)/api-only/examples
 	
 	# Copy core API files
 	cp include/binary_clock_api.h $(DIST_DIR)/api-only/include/
@@ -228,7 +232,11 @@ dist-cli: $(TARGET)
 
 dist-library: $(API_OBJ) $(DISPLAY_OBJ)
 	@echo "📦 Creating library distribution package..."
-	$(MKDIR) $(DIST_DIR)/library/{include,src,docs,examples}
+	$(MKDIR) $(DIST_DIR)/library
+	$(MKDIR) $(DIST_DIR)/library/include
+	$(MKDIR) $(DIST_DIR)/library/src
+	$(MKDIR) $(DIST_DIR)/library/docs
+	$(MKDIR) $(DIST_DIR)/library/examples
 	
 	# Copy headers
 	cp include/binary_clock_api.h $(DIST_DIR)/library/include/
