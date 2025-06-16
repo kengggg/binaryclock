@@ -13,9 +13,6 @@ jobs:
   create-release:
     name: 🏷️ Create Release
     runs-on: ubuntu-latest
-    outputs:
-      release-id: ${{ steps.create-release.outputs.id }}
-      upload-url: ${{ steps.create-release.outputs.upload_url }}
     steps:
       - name: 📥 Checkout
         uses: actions/checkout@v4
@@ -293,67 +290,34 @@ jobs:
         shell: msys2 {0}
 
       - name: 📤 Upload CLI Package
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v1
         with:
-          upload_url: ${{ needs.create-release.outputs.upload-url }}
-          asset_path: ./release/binary-clock-cli-${{ github.ref_name }}-${{ matrix.target }}.${{ matrix.archive_ext }}
-          asset_name: binary-clock-cli-${{ github.ref_name }}-${{ matrix.target }}.${{ matrix.archive_ext }}
-          asset_content_type: application/octet-stream
+          tag_name: ${{ github.ref_name }}
+          files: ./release/binary-clock-cli-${{ github.ref_name }}-${{ matrix.target }}.${{ matrix.archive_ext }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 📤 Upload Cross-Platform Packages (Linux only)
         if: matrix.os == 'ubuntu-latest'
-        run: |
-          # Upload API packages
-          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-               -H "Content-Type: application/octet-stream" \
-               --data-binary @release/binary-clock-api-${{ github.ref_name }}.tar.gz \
-               "${{ needs.create-release.outputs.upload-url }}?name=binary-clock-api-${{ github.ref_name }}.tar.gz"
-          
-          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-               -H "Content-Type: application/octet-stream" \
-               --data-binary @release/binary-clock-api-${{ github.ref_name }}.zip \
-               "${{ needs.create-release.outputs.upload-url }}?name=binary-clock-api-${{ github.ref_name }}.zip"
-          
-          # Upload library packages
-          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-               -H "Content-Type: application/octet-stream" \
-               --data-binary @release/binary-clock-library-${{ github.ref_name }}.tar.gz \
-               "${{ needs.create-release.outputs.upload-url }}?name=binary-clock-library-${{ github.ref_name }}.tar.gz"
-               
-          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-               -H "Content-Type: application/octet-stream" \
-               --data-binary @release/binary-clock-library-${{ github.ref_name }}.zip \
-               "${{ needs.create-release.outputs.upload-url }}?name=binary-clock-library-${{ github.ref_name }}.zip"
-          
-          # Upload source packages
-          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-               -H "Content-Type: application/octet-stream" \
-               --data-binary @release/binary-clock-source-${{ github.ref_name }}.tar.gz \
-               "${{ needs.create-release.outputs.upload-url }}?name=binary-clock-source-${{ github.ref_name }}.tar.gz"
-               
-          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-               -H "Content-Type: application/octet-stream" \
-               --data-binary @release/binary-clock-source-${{ github.ref_name }}.zip \
-               "${{ needs.create-release.outputs.upload-url }}?name=binary-clock-source-${{ github.ref_name }}.zip"
-          
-          # Upload main checksums
-          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-               -H "Content-Type: text/plain" \
-               --data-binary @release/checksums.txt \
-               "${{ needs.create-release.outputs.upload-url }}?name=checksums.txt"
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: |
+            ./release/binary-clock-api-${{ github.ref_name }}.tar.gz
+            ./release/binary-clock-api-${{ github.ref_name }}.zip
+            ./release/binary-clock-library-${{ github.ref_name }}.tar.gz
+            ./release/binary-clock-library-${{ github.ref_name }}.zip
+            ./release/binary-clock-source-${{ github.ref_name }}.tar.gz
+            ./release/binary-clock-source-${{ github.ref_name }}.zip
+            ./release/checksums.txt
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 📤 Upload Platform Checksums
         if: matrix.os != 'ubuntu-latest'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v1
         with:
-          upload_url: ${{ needs.create-release.outputs.upload-url }}
-          asset_path: ./release/checksums-${{ matrix.target }}.txt
-          asset_name: checksums-${{ matrix.target }}.txt
-          asset_content_type: text/plain
+          tag_name: ${{ github.ref_name }}
+          files: ./release/checksums-${{ matrix.target }}.txt
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   finalize-release:
     name: ✅ Finalize Release
