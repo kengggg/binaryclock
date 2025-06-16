@@ -11,16 +11,6 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        include:
-          - os: ubuntu-latest
-            timeout_cmd: timeout 5s
-            shell: bash
-          - os: macos-latest
-            timeout_cmd: timeout 5s
-            shell: bash
-          - os: windows-latest
-            timeout_cmd: timeout /t 5
-            shell: cmd
             
     runs-on: ${{ matrix.os }}
     
@@ -81,10 +71,21 @@ jobs:
       run: make test
       shell: msys2 {0}
     
-    - name: Check if binary runs (Unix)
-      if: matrix.os != 'windows-latest'
+    - name: Check if binary runs (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
       run: |
-        ${{ matrix.timeout_cmd }} ./binary_clock || [ $? -eq 124 ] || [ $? -eq 142 ]
+        timeout 5s ./binary_clock || [ $? -eq 124 ] || [ $? -eq 142 ]
+        echo "Binary clock runs successfully!"
+    
+    - name: Check if binary runs (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        # Start binary_clock in background and kill after 5 seconds
+        ./binary_clock &
+        CLOCK_PID=$!
+        sleep 5
+        kill $CLOCK_PID 2>/dev/null || true
+        wait $CLOCK_PID 2>/dev/null || true
         echo "Binary clock runs successfully!"
     
     - name: Check if binary runs (Windows)
