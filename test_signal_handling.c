@@ -1,14 +1,17 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <string.h>
-
 // Cross-platform compatibility
 #ifdef _WIN32
     // Windows doesn't support fork/signal testing the same way
     // We'll skip the signal test on Windows
 #else
     #define _POSIX_C_SOURCE 200809L  // Enable POSIX functions
+#endif
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <string.h>
+
+#ifndef _WIN32
     #include <unistd.h>
     #include <sys/wait.h>
 #endif
