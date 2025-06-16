@@ -2,7 +2,6 @@
 ifeq ($(OS),Windows_NT)
     CC = gcc
     TARGET = binary_clock.exe
-    TEST_TARGET = test_binary_clock.exe
     SIGNAL_TEST = test_signal_handling.exe
     # MSYS2 provides Unix-like commands
     RM = rm -f
@@ -11,7 +10,6 @@ ifeq ($(OS),Windows_NT)
 else
     CC = gcc
     TARGET = binary_clock
-    TEST_TARGET = test_binary_clock
     SIGNAL_TEST = test_signal_handling
     RM = rm -f
     MKDIR = mkdir -p
@@ -25,7 +23,6 @@ TEST_DIR = tests
 BUILD_DIR = build
 
 CFLAGS = -Wall -Wextra -std=c99 -pedantic -g -I$(INCLUDE_DIR)
-LIB_OBJ = $(BUILD_DIR)/binary_clock_lib.o
 API_OBJ = $(BUILD_DIR)/binary_clock_api.o
 DISPLAY_OBJ = $(BUILD_DIR)/binary_clock_display.o
 API_TEST_TARGET = test_binary_clock_api
@@ -41,9 +38,6 @@ $(BUILD_DIR):
 $(TARGET): $(SRC_DIR)/binary_clock.c $(API_OBJ) $(DISPLAY_OBJ) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -o $(TARGET) $(SRC_DIR)/binary_clock.c $(API_OBJ) $(DISPLAY_OBJ)
 
-# Build the library object file
-$(LIB_OBJ): $(SRC_DIR)/binary_clock_lib.c $(INCLUDE_DIR)/binary_clock_lib.h | $(BUILD_DIR)
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/binary_clock_lib.c -o $(LIB_OBJ)
 
 # Build the API object file
 $(API_OBJ): $(SRC_DIR)/binary_clock_api.c $(INCLUDE_DIR)/binary_clock_api.h | $(BUILD_DIR)
@@ -54,20 +48,15 @@ $(DISPLAY_OBJ): $(SRC_DIR)/binary_clock_display.c $(INCLUDE_DIR)/binary_clock_di
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/binary_clock_display.c -o $(DISPLAY_OBJ)
 
 # Build and run tests
-test: $(TEST_TARGET) $(SIGNAL_TEST) $(API_TEST_TARGET)
+test: $(SIGNAL_TEST) $(API_TEST_TARGET)
 ifeq ($(OS),Windows_NT)
-	./$(TEST_TARGET)
 	./$(SIGNAL_TEST)
 	./$(API_TEST_TARGET)
 else
-	./$(TEST_TARGET)
 	./$(SIGNAL_TEST)
 	./$(API_TEST_TARGET)
 endif
 
-# Build the test executable
-$(TEST_TARGET): $(TEST_DIR)/test_binary_clock.c $(LIB_OBJ) | $(BUILD_DIR)
-	$(CC) $(CFLAGS) -o $(TEST_TARGET) $(TEST_DIR)/test_binary_clock.c $(LIB_OBJ)
 
 # Build the signal handling test
 $(SIGNAL_TEST): $(TEST_DIR)/test_signal_handling.c | $(BUILD_DIR)
@@ -79,8 +68,8 @@ $(API_TEST_TARGET): $(TEST_DIR)/test_binary_clock_api.c $(API_OBJ) | $(BUILD_DIR
 
 # Clean build artifacts
 clean:
-	$(RM) $(TARGET) $(TEST_TARGET) $(SIGNAL_TEST) $(API_TEST_TARGET) $(LIB_OBJ) $(API_OBJ) $(DISPLAY_OBJ)
-	$(RM) -r $(BUILD_DIR)
+	       $(RM) $(TARGET) $(SIGNAL_TEST) $(API_TEST_TARGET) $(API_OBJ) $(DISPLAY_OBJ)
+	       $(RM) -r $(BUILD_DIR)
 
 # Run the binary clock
 run: $(TARGET)
@@ -99,14 +88,14 @@ uninstall:
 	sudo rm -f /usr/local/bin/$(TARGET)
 
 # Check for memory leaks with valgrind (if available, Unix only)
-memcheck: $(TEST_TARGET)
+memcheck: $(API_TEST_TARGET)
 ifeq ($(OS),Windows_NT)
 	@echo "Valgrind not available on Windows, skipping memory check"
 else
-	@if command -v valgrind >/dev/null 2>&1; then \
-		valgrind --leak-check=full --show-leak-kinds=all ./$(TEST_TARGET); \
-	else \
-		echo "Valgrind not available, skipping memory check"; \
+	       @if command -v valgrind >/dev/null 2>&1; then \
+	               valgrind --leak-check=full --show-leak-kinds=all ./$(API_TEST_TARGET); \
+		else \
+			echo "Valgrind not available, skipping memory check"; \
 	fi
 endif
 

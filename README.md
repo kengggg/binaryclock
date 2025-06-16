@@ -137,14 +137,11 @@ binaryclock/
 ├── src/                    # Source code files
 │   ├── binary_clock.c         # Main CLI application
 │   ├── binary_clock_api.c     # Core API implementation (data only)
-│   ├── binary_clock_display.c # Display utilities (visualization)
-│   └── binary_clock_lib.c     # Legacy library (deprecated)
+│   └── binary_clock_display.c # Display utilities (visualization)
 ├── include/               # Header files
 │   ├── binary_clock_api.h     # Core API header (pure data)
-│   ├── binary_clock_display.h # Display utilities header
-│   └── binary_clock_lib.h     # Legacy library header
+│   └── binary_clock_display.h # Display utilities header
 ├── tests/                 # Test files
-│   ├── test_binary_clock.c      # Legacy library tests
 │   ├── test_binary_clock_api.c  # Core API tests (186 tests)
 │   └── test_signal_handling.c   # Signal handling tests
 ├── build/                 # Build artifacts (auto-created)
