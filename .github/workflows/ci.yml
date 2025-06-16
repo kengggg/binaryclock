@@ -51,17 +51,35 @@ jobs:
           mingw-w64-x86_64-make
           make
     
-    - name: Clean any existing build artifacts
+    - name: Clean any existing build artifacts (Unix)
+      if: matrix.os != 'windows-latest'
       run: make clean || true
-      shell: ${{ matrix.os == 'windows-latest' && 'msys2 {0}' || 'bash' }}
+      shell: bash
     
-    - name: Build project
+    - name: Clean any existing build artifacts (Windows)
+      if: matrix.os == 'windows-latest'
+      run: make clean || true
+      shell: msys2 {0}
+    
+    - name: Build project (Unix)
+      if: matrix.os != 'windows-latest'
       run: make all
-      shell: ${{ matrix.os == 'windows-latest' && 'msys2 {0}' || 'bash' }}
+      shell: bash
     
-    - name: Run tests
+    - name: Build project (Windows)
+      if: matrix.os == 'windows-latest'
+      run: make all
+      shell: msys2 {0}
+    
+    - name: Run tests (Unix)
+      if: matrix.os != 'windows-latest'
       run: make test
-      shell: ${{ matrix.os == 'windows-latest' && 'msys2 {0}' || 'bash' }}
+      shell: bash
+    
+    - name: Run tests (Windows)
+      if: matrix.os == 'windows-latest'
+      run: make test
+      shell: msys2 {0}
     
     - name: Check if binary runs (Unix)
       if: matrix.os != 'windows-latest'
@@ -79,6 +97,12 @@ jobs:
         echo "Binary clock runs successfully!"
       shell: msys2 {0}
     
-    - name: Clean build artifacts
+    - name: Clean build artifacts (Unix)
+      if: matrix.os != 'windows-latest'
       run: make clean
-      shell: ${{ matrix.os == 'windows-latest' && 'msys2 {0}' || 'bash' }}
+      shell: bash
+    
+    - name: Clean build artifacts (Windows)
+      if: matrix.os == 'windows-latest'
+      run: make clean
+      shell: msys2 {0}
