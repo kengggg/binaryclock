@@ -1,6 +1,8 @@
 # 🌚🌝 Binary Clock 🌝🌚
 
 [![CI](https://github.com/kengggg/binaryclock/actions/workflows/ci.yml/badge.svg)](https://github.com/kengggg/binaryclock/actions/workflows/ci.yml)
+[![Release](https://github.com/kengggg/binaryclock/actions/workflows/release.yml/badge.svg)](https://github.com/kengggg/binaryclock/actions/workflows/release.yml)
+[![Latest Release](https://img.shields.io/github/v/release/kengggg/binaryclock?include_prereleases&sort=semver)](https://github.com/kengggg/binaryclock/releases/latest)
 
 A delightfully lunar way to tell time! This C program displays the current time in binary format with multiple output modes - from cosmic moon emojis 🌚🌝 to practical JSON data for your applications.
 

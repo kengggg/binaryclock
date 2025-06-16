@@ -295,6 +295,8 @@ jobs:
           tag_name: ${{ github.ref_name }}
           files: ./release/binary-clock-cli-${{ github.ref_name }}-${{ matrix.target }}.${{ matrix.archive_ext }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          fail_on_unmatched_files: true
+          append_body: false
 
       - name: 📤 Upload Cross-Platform Packages (Linux only)
         if: matrix.os == 'ubuntu-latest'
@@ -310,6 +312,8 @@ jobs:
             ./release/binary-clock-source-${{ github.ref_name }}.zip
             ./release/checksums.txt
           token: ${{ secrets.GITHUB_TOKEN }}
+          fail_on_unmatched_files: true
+          append_body: false
 
       - name: 📤 Upload Platform Checksums
         if: matrix.os != 'ubuntu-latest'
@@ -318,6 +322,8 @@ jobs:
           tag_name: ${{ github.ref_name }}
           files: ./release/checksums-${{ matrix.target }}.txt
           token: ${{ secrets.GITHUB_TOKEN }}
+          fail_on_unmatched_files: true
+          append_body: false
 
   finalize-release:
     name: ✅ Finalize Release
