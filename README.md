@@ -96,6 +96,14 @@ make test
 make clean
 ```
 
+## Memory Management
+
+This project avoids heap allocation entirely. All state lives on the stack or in
+static buffers, which means there is no dynamic memory to free and memory leaks
+are structurally prevented. Functions that return strings (like
+`binary_clock_get_error_string` and `binary_clock_get_version`) provide pointers
+to static data that must not be freed.
+
 ## How It Works
 
 The binary clock uses a modular architecture with complete separation between core logic and visualization:

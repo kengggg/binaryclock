@@ -346,10 +346,11 @@ bool binary_clock_display_binary_to_string(const binary_value_t* binary_val, cha
             if (buffer_size < (binary_val->bit_count * 4) + 1) { // 4 bytes per emoji
                 return false;
             }
-            buffer[0] = '\0';
             for (int i = 0; i < binary_val->bit_count; i++) {
-                strcat(buffer, binary_val->bits[i] ? "🌝" : "🌚");
+                const char* emoji = binary_val->bits[i] ? "🌝" : "🌚";
+                memcpy(buffer + (i * 4), emoji, 4);
             }
+            buffer[binary_val->bit_count * 4] = '\0';
             break;
             
         case 'd': // Decimal format

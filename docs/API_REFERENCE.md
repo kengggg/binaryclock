@@ -14,6 +14,7 @@ The Binary Clock API provides a clean, lightweight interface for binary time rep
 - [JSON API](#json-api)
 - [Performance Guidelines](#performance-guidelines)
 - [Error Handling](#error-handling)
+- [Memory Management](#memory-management)
 
 ---
 
@@ -820,6 +821,14 @@ else
     exit 1
 fi
 ```
+
+## Memory Management
+
+The API uses only stack allocation and static storage. No function allocates or
+frees heap memory, which eliminates the risk of memory leaks. Any buffers passed
+to the API or display utilities remain owned by the caller. Strings returned by
+`binary_clock_get_error_string` and `binary_clock_get_version` are backed by
+static data and must not be freed.
 
 ---
 
